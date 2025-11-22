@@ -14,39 +14,9 @@ base-theme: monograph # essay or monograph
 base-font-size: 1.3em
 text-color: "#191919"
 link-color: "#0d6efd"
-base-font-family: Georgia # comment out for bootstrap defaults. e.g. Roboto
-font-cdn: # add font stylesheet, e.g. <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
+base-font-family: Lobster # comment out for bootstrap defaults. e.g. Roboto
+font-cdn: <link href="https://fonts.googleapis.com/css?family=Lobster&display=swap" rel="stylesheet"> # add font stylesheet, e.g. <link href="https://fonts.googleapis.com/css?family=Roboto&display=swap" rel="stylesheet">
 
-##########
-# ESSAY BOOKS METADATA
-# Define the structure of books/essays in this framework
-# This metadata is used to generate tables of contents and navigation
-#
-# Format:
-# essay-books:
-#   - slug: unique-identifier-for-book
-#     title: "Full Title of the Book"
-#     author: "Author Name"
-#     contents:
-#       - title: "Chapter 1 Title"
-#         order: 1
-#       - title: "Chapter 2 Title"
-#         order: 2
-#
-# Example:
-essay:
-  - slug: montaigne-essays
-    title: "Selected Essays"
-    author: Mary Wollstonecraft (Godwin) Shelley
-    contents:
-      - title: "Of Thumbs"
-        order: 1
-      - title: "Of Smells"
-        order: 2
-      - title: "Of Sleep"
-        order: 3
-      - title: "Of a Monstrous Child"
-        order: 4
 
 
 ##########
@@ -55,9 +25,9 @@ essay:
 # the featured image is appears as either a full splash image, a half page image (great for book covers), or you can enter no-image in image style below for no image, just a title. 
 # use either an objectid (from an item in this collect), a relative location of an image in this repo, or a full url to an image elsewhere
 image-style: half-image # full-image, half-image, or no-image
-featured-image: /assets/img/Frontispiece_to_Frankenstein_1831.jpg
-featured-image-credit: "Illustration by Theodor von Holst from the frontispiece of the 1831 edition"
-featured-image-alt-text: "An illustration of writing brushes with Japanese labels" # add alt text if using url for featured-image (objectid will be automatic from metadata)
+featured-image: https://www.gutenberg.org/cache/epub/84/pg84.cover.medium.jpg
+featured-image-credit: "Gutenberg edition cover page"
+featured-image-alt-text: "Ugly green-toned cover"
 
 ##########
 # CollectionBuilder Theme Customization
