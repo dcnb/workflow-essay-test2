@@ -4,28 +4,28 @@ on:
   workflow_dispatch: 
     inputs:
       book_id:
-        description: 'Project Gutenberg Book ID (e. g., 84 for Frankenstein, 64317 for Great Gatsby)'
+        description: 'Project Gutenberg Book ID (e.g., 84 for Frankenstein, 64317 for Great Gatsby)'
         required: true
         type: string
       clear_existing:
-        description: 'Clear existing _essay content before extraction'
+        description:  'Clear existing _essay content before extraction'
         required: false
         default: false
-        type: boolean
+        type:  boolean
 
 jobs:
-  extract: 
+  extract:
     runs-on: ubuntu-latest
     permissions:
-      contents:  write
+      contents: write
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses:  actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with: 
+        with:
           python-version: '3.11'
 
       - name: Clear existing essay content (if requested)
@@ -37,24 +37,110 @@ jobs:
 
       - name: Extract book from Project Gutenberg
         run: |
-          echo "Extracting book #${{ inputs. book_id }} from Project Gutenberg..."
+          echo "Extracting book #${{ inputs.book_id }} from Project Gutenberg..."
           python gutenberg-extraction.py ${{ inputs.book_id }} --cb-essay --project-root .
           echo "Extraction complete!"
 
-      - name: List extracted files
-        run:  |
+      - name:  List extracted files
+        run: |
           echo "=== _essay/ files ==="
           ls -la _essay/ 2>/dev/null || echo "No _essay directory"
           echo ""
           echo "=== _data/book.yml ==="
           cat _data/book.yml 2>/dev/null || echo "No book.yml found"
 
+      - name: Fetch cover image from Project Gutenberg
+        run: |
+          echo "Checking for cover images..."
+          
+          # Install required packages
+          pip install requests beautifulsoup4 PyYAML
+          
+          # Create Python script to fetch cover image
+          cat << 'EOF' > fetch_cover.py
+          import requests
+          from bs4 import BeautifulSoup
+          import re
+          import yaml
+          
+          book_id = "${{ inputs.book_id }}"
+          gutenberg_url = f"https://www.gutenberg.org/ebooks/{book_id}"
+          
+          # Fetch the book page
+          response = requests.get(gutenberg_url)
+          if response.status_code != 200:
+              print(f"Could not fetch book page (status {response.status_code})")
+              exit(0)
+          
+          soup = BeautifulSoup(response.content, 'html.parser')
+          
+          # Find cover images
+          cover_links = []
+          for link in soup.find_all('a', href=True):
+              href = link['href']
+              if 'cover' in href. lower() and (href.endswith('.jpg') or href.endswith('.png')):
+                  # Make absolute URL
+                  if href.startswith('//'):
+                      href = 'https:' + href
+                  elif href.startswith('/'):
+                      href = 'https://www.gutenberg.org' + href
+                  cover_links.append(href)
+          
+          if not cover_links:
+              print("No cover images found")
+              exit(0)
+          
+          # Prioritize:  large > medium > small
+          selected_cover = None
+          for priority in ['large', 'medium', 'small']:
+              for link in cover_links:
+                  if priority in link.lower():
+                      selected_cover = link
+                      break
+              if selected_cover: 
+                  break
+          
+          # If no size found, just use the first one
+          if not selected_cover and cover_links:
+              selected_cover = cover_links[0]
+          
+          if selected_cover:
+              print(f"Found cover image: {selected_cover}")
+              
+              # Read book.yml for title and author
+              with open('_data/book.yml', 'r') as f:
+                  book_data = yaml.safe_load(f)
+              
+              title = book_data.get('title', 'Unknown Title')
+              author = book_data. get('author', 'Unknown Author')
+              
+              # Read or create theme.yml
+              theme_file = '_data/theme.yml'
+              try:
+                  with open(theme_file, 'r') as f:
+                      theme_data = yaml.safe_load(f) or {}
+              except FileNotFoundError:
+                  theme_data = {}
+              
+              # Update theme.yml with cover image info
+              theme_data['featured-image'] = selected_cover
+              theme_data['featured-image-credit'] = f'This is a cover of the {title} by {author} as extracted from Project Gutenberg; it can be found here: {gutenberg_url}'
+              theme_data['featured-image-alt-text'] = f'Cover image of {title}'
+              
+              # Write back to theme.yml
+              with open(theme_file, 'w') as f:
+                  yaml.dump(theme_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+              
+              print(f"Updated {theme_file} with cover image metadata")
+          else:
+              print("No suitable cover image found")
+          EOF
+          
+          python fetch_cover.py
+
       - name: Update _config.yml with book metadata
         run: |
           echo "Updating _config.yml with book metadata..."
-          
-          # Install PyYAML for parsing YAML
-          pip install PyYAML
           
           # Create Python script to update config
           cat << 'EOF' > update_config.py
@@ -66,7 +152,7 @@ jobs:
               book_data = yaml.safe_load(f)
           
           title = book_data.get('title', 'Unknown Title')
-          author = book_data.get('author', 'Unknown Author')
+          author = book_data. get('author', 'Unknown Author')
           
           # Read _config.yml
           with open('_config.yml', 'r') as f:
@@ -92,10 +178,10 @@ jobs:
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user. email "github-actions[bot]@users.noreply.github.com"
 
           # Add all extracted and modified files
-          git add _essay/ _data/book.yml _config.yml 2>/dev/null || true
+          git add _essay/ _data/ _config.yml 2>/dev/null || true
 
           # Check if there are changes to commit
           if git diff --staged --quiet; then
@@ -104,6 +190,7 @@ jobs:
             git commit -m "Extract Gutenberg book #${{ inputs.book_id }} and update site config" \
               -m "Extracted using gutenberg-extraction.py --cb-essay" \
               -m "Updated _config.yml with book title and author" \
+              -m "Updated _data/theme.yml with cover image (if available)" \
               -m "Source: https://www.gutenberg.org/ebooks/${{ inputs.book_id }}"
             git push
             echo "Changes committed and pushed!  GitHub Pages will rebuild the site."
