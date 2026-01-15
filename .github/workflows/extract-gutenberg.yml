@@ -1,10 +1,10 @@
 name: Extract Gutenberg Book
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: 
     inputs:
       book_id:
-        description: 'Project Gutenberg Book ID (e.g., 84 for Frankenstein, 64317 for Great Gatsby)'
+        description: 'Project Gutenberg Book ID (e. g., 84 for Frankenstein, 64317 for Great Gatsby)'
         required: true
         type: string
       clear_existing:
@@ -14,10 +14,10 @@ on:
         type: boolean
 
 jobs:
-  extract:
+  extract: 
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents:  write
 
     steps:
       - name: Checkout repository
@@ -25,7 +25,7 @@ jobs:
 
       - name: Set up Python
         uses: actions/setup-python@v5
-        with:
+        with: 
           python-version: '3.11'
 
       - name: Clear existing essay content (if requested)
@@ -37,33 +37,74 @@ jobs:
 
       - name: Extract book from Project Gutenberg
         run: |
-          echo "Extracting book #${{ inputs.book_id }} from Project Gutenberg..."
+          echo "Extracting book #${{ inputs. book_id }} from Project Gutenberg..."
           python gutenberg-extraction.py ${{ inputs.book_id }} --cb-essay --project-root .
           echo "Extraction complete!"
 
       - name: List extracted files
-        run: |
+        run:  |
           echo "=== _essay/ files ==="
           ls -la _essay/ 2>/dev/null || echo "No _essay directory"
           echo ""
           echo "=== _data/book.yml ==="
           cat _data/book.yml 2>/dev/null || echo "No book.yml found"
 
+      - name: Update _config.yml with book metadata
+        run: |
+          echo "Updating _config.yml with book metadata..."
+          
+          # Install PyYAML for parsing YAML
+          pip install PyYAML
+          
+          # Create Python script to update config
+          cat << 'EOF' > update_config.py
+          import yaml
+          import sys
+          
+          # Read book.yml
+          with open('_data/book.yml', 'r') as f:
+              book_data = yaml.safe_load(f)
+          
+          title = book_data.get('title', 'Unknown Title')
+          author = book_data.get('author', 'Unknown Author')
+          
+          # Read _config.yml
+          with open('_config.yml', 'r') as f:
+              config = yaml.safe_load(f)
+          
+          # Update values
+          config['title'] = title
+          config['author'] = author
+          config['description'] = f"A digital edition of {title} by {author}, extracted from Project Gutenberg"
+          
+          # Write back to _config.yml
+          with open('_config.yml', 'w') as f:
+              yaml. dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+          
+          print(f"Updated _config.yml:")
+          print(f"  title: {title}")
+          print(f"  author: {author}")
+          print(f"  description: {config['description']}")
+          EOF
+          
+          python update_config.py
+
       - name: Commit and push changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Add all extracted files
-          git add _essay/ _data/book.yml 2>/dev/null || true
+          # Add all extracted and modified files
+          git add _essay/ _data/book.yml _config.yml 2>/dev/null || true
 
           # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Extract Gutenberg book #${{ inputs.book_id }}" \
+            git commit -m "Extract Gutenberg book #${{ inputs.book_id }} and update site config" \
               -m "Extracted using gutenberg-extraction.py --cb-essay" \
+              -m "Updated _config.yml with book title and author" \
               -m "Source: https://www.gutenberg.org/ebooks/${{ inputs.book_id }}"
             git push
-            echo "Changes committed and pushed!"
+            echo "Changes committed and pushed!  GitHub Pages will rebuild the site."
           fi
