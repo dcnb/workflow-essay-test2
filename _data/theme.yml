@@ -6,11 +6,10 @@ base-font-family: Lobster
 font-cdn: <link href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
   rel="stylesheet">
 image-style: half-image
-featured-image: https://www.gutenberg.org/cache/epub/77693/pg77693.cover.medium.jpg
-featured-image-credit: 'This is a cover of the Lord Lister No. 0040: De valsche spoorwegdief
-  by Matull, Kurt, 1872-1920 as extracted from Project Gutenberg; it can be found
-  here: https://www.gutenberg.org/ebooks/77693'
-featured-image-alt-text: 'Cover image of Lord Lister No. 0040: De valsche spoorwegdief'
+featured-image: https://www.gutenberg.org/cache/epub/77696/pg77696.cover.medium.jpg
+featured-image-credit: 'This is a cover of the Outward bound by Vane, Sutton as extracted
+  from Project Gutenberg; it can be found here: https://www.gutenberg.org/ebooks/77696'
+featured-image-alt-text: Cover image of Outward bound
 home-title-y-padding: 10em
 home-banner-image-position: center
 advanced-search: true
