@@ -6,10 +6,10 @@ base-font-family: Lobster
 font-cdn: <link href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
   rel="stylesheet">
 image-style: half-image
-featured-image: https://www.gutenberg.org/cache/epub/77696/pg77696.cover.medium.jpg
-featured-image-credit: 'This is a cover of the Outward bound by Vane, Sutton as extracted
-  from Project Gutenberg; it can be found here: https://www.gutenberg.org/ebooks/77696'
-featured-image-alt-text: Cover image of Outward bound
+featured-image: https://www.gutenberg.org/cache/epub/1342/pg1342.cover.medium.jpg
+featured-image-credit: 'This is a cover of the Pride and Prejudice by Austen, Jane,
+  1775-1817 as extracted from Project Gutenberg; it can be found here: https://www.gutenberg.org/ebooks/1342'
+featured-image-alt-text: Cover image of Pride and Prejudice
 home-title-y-padding: 10em
 home-banner-image-position: center
 advanced-search: true

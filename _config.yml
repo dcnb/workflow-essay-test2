@@ -12,11 +12,11 @@ defaults:
 url: https://dcnb.github.io
 baseurl: /frankenstein
 source-code: https://github.com/CollectionBuilder/collectionbuilder-csv
-title: Outward bound
-author: Vane, Sutton
+title: Pride and Prejudice
+author: Austen, Jane, 1775-1817
 tagline: null
-description: A digital edition of Outward bound by Vane, Sutton, extracted from Project
-  Gutenberg
+description: A digital edition of Pride and Prejudice by Austen, Jane, 1775-1817,
+  extracted from Project Gutenberg
 keywords: digital humanities; multimodal essays; lib-static
 exhibit-creator: dcnb
 metadata: demo-compoundobjects-metadata
