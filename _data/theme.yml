@@ -6,10 +6,11 @@ base-font-family: Lobster
 font-cdn: <link href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
   rel="stylesheet">
 image-style: half-image
-featured-image: https://www.gutenberg.org/cache/epub/49525/pg49525.cover.medium.jpg
-featured-image-credit: 'This is a cover of the First Lensman by Smith, E. E. (Edward
-  Elmer), 1890-1965 as extracted from Project Gutenberg; it can be found here: https://www.gutenberg.org/ebooks/49525'
-featured-image-alt-text: Cover image of First Lensman
+featured-image: https://www.gutenberg.org/cache/epub/8492/pg8492.cover.medium.jpg
+featured-image-credit: 'This is a cover of the The King in Yellow by Chambers, Robert
+  W. (Robert William), 1865-1933 as extracted from Project Gutenberg; it can be found
+  here: https://www.gutenberg.org/ebooks/8492'
+featured-image-alt-text: Cover image of The King in Yellow
 home-title-y-padding: 10em
 home-banner-image-position: center
 advanced-search: true
