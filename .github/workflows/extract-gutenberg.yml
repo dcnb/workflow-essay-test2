@@ -2,8 +2,8 @@ name: Extract Gutenberg Book
 
 on:
   workflow_dispatch: 
-    inputs: 
-      book_id: 
+    inputs:
+      book_id:
         description: 'Project Gutenberg Book ID (e.g., 84 for Frankenstein, 64317 for Great Gatsby)'
         required: true
         type: string
@@ -19,6 +19,7 @@ jobs:
     permissions:
       contents: write
       pages: write
+      actions: write
 
     steps: 
       - name: Checkout repository
@@ -48,27 +49,24 @@ jobs:
           ls -la _essay/ 2>/dev/null || echo "No _essay directory"
           echo ""
           echo "=== _data/book.yml ==="
-          cat _data/book.yml 2>/dev/null || echo "No book.yml found"
+          cat _data/book. yml 2>/dev/null || echo "No book.yml found"
 
-      - name: Process cover image and update theme.yml
+      - name: Process cover image and update theme. yml
         run: |
-          echo "Processing cover image from book.yml..."
+          echo "Processing cover image from book. yml..."
           
-          # Install PyYAML
           pip install PyYAML
           
-          # Create Python script to process cover image
           cat << 'EOF' > process_cover.py
           import yaml
           
           book_id = "${{ inputs.book_id }}"
           gutenberg_url = f"https://www.gutenberg.org/ebooks/{book_id}"
           
-          # Read book.yml
           with open('_data/book.yml', 'r') as f:
-              book_data = yaml.safe_load(f)
+              book_data = yaml. safe_load(f)
           
-          title = book_data.get('title', 'Unknown Title')
+          title = book_data. get('title', 'Unknown Title')
           author = book_data.get('author', 'Unknown Author')
           cover_urls = book_data.get('cover_urls', [])
           
@@ -76,7 +74,6 @@ jobs:
               print("No cover images found in book.yml")
               exit(0)
           
-          # Prioritize:  large > medium > small
           selected_cover = None
           for priority in ['large', 'medium', 'small']:
               for url in cover_urls:
@@ -86,14 +83,12 @@ jobs:
               if selected_cover: 
                   break
           
-          # If no size found, just use the first one
-          if not selected_cover and cover_urls: 
+          if not selected_cover and cover_urls:
               selected_cover = cover_urls[0]
           
-          if selected_cover:
+          if selected_cover: 
               print(f"Found cover image: {selected_cover}")
               
-              # Read or create theme.yml
               theme_file = '_data/theme.yml'
               try:
                   with open(theme_file, 'r') as f:
@@ -101,12 +96,10 @@ jobs:
               except FileNotFoundError:
                   theme_data = {}
               
-              # Update theme.yml with cover image info
               theme_data['featured-image'] = selected_cover
               theme_data['featured-image-credit'] = f'This is a cover of the {title} by {author} as extracted from Project Gutenberg; it can be found here: {gutenberg_url}'
               theme_data['featured-image-alt-text'] = f'Cover image of {title}'
               
-              # Write back to theme.yml
               with open(theme_file, 'w') as f:
                   yaml.dump(theme_data, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
               
@@ -121,28 +114,22 @@ jobs:
         run: |
           echo "Updating _config.yml with book metadata..."
           
-          # Create Python script to update config
           cat << 'EOF' > update_config.py
           import yaml
-          import sys
           
-          # Read book.yml
           with open('_data/book.yml', 'r') as f:
               book_data = yaml.safe_load(f)
           
           title = book_data.get('title', 'Unknown Title')
           author = book_data.get('author', 'Unknown Author')
           
-          # Read _config.yml
-          with open('_config.yml', 'r') as f:
+          with open('_config. yml', 'r') as f:
               config = yaml.safe_load(f)
           
-          # Update values
           config['title'] = title
           config['author'] = author
           config['description'] = f"A digital edition of {title} by {author}, extracted from Project Gutenberg"
           
-          # Write back to _config.yml
           with open('_config.yml', 'w') as f:
               yaml.dump(config, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
           
@@ -157,30 +144,67 @@ jobs:
       - name: Commit and push changes
         run:  |
           git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.email "github-actions[bot]@users. noreply.github.com"
 
-          # Add all extracted and modified files
           git add _essay/ _data/ _config.yml 2>/dev/null || true
 
-          # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "No changes to commit"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
           else
             git commit -m "Extract Gutenberg book #${{ inputs.book_id }} and update site config" \
-              -m "Extracted using gutenberg-extraction.py --cb-essay" \
-              -m "Updated _config.yml with book title and author" \
+              -m "Extracted using gutenberg-extraction. py --cb-essay" \
+              -m "Updated _config. yml with book title and author" \
               -m "Updated _data/theme.yml with cover image (if available)" \
               -m "Source: https://www.gutenberg.org/ebooks/${{ inputs.book_id }}"
             git push
             echo "Changes committed and pushed!"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
           fi
+        id: commit
 
-      - name: Trigger GitHub Pages rebuild
-        run: |
-          echo "Triggering GitHub Pages rebuild..."
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization:  Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/pages/builds
-          echo "GitHub Pages rebuild triggered!"
+  deploy-pages:
+    needs: extract
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency: 
+      group: "pages"
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps. deployment.outputs.page_url }}
+
+    steps:
+      - name:  Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Pull latest changes
+        run: git pull origin ${{ github.ref_name }}
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with: 
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Build with Jekyll
+        run: bundle exec jekyll build --baseurl "${{ steps.pages.outputs.base_path }}"
+        env:
+          JEKYLL_ENV: production
+
+      - name: Upload artifact
+        uses:  actions/upload-pages-artifact@v3
+        with:
+          path: "_site/"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
