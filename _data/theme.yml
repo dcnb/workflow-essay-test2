@@ -6,11 +6,11 @@ base-font-family: Lobster
 font-cdn: <link href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
   rel="stylesheet">
 image-style: half-image
-featured-image: https://www.gutenberg.org/cache/epub/8492/pg8492.cover.medium.jpg
-featured-image-credit: 'This is a cover of the The King in Yellow by Chambers, Robert
-  W. (Robert William), 1865-1933 as extracted from Project Gutenberg; it can be found
-  here: https://www.gutenberg.org/ebooks/8492'
-featured-image-alt-text: Cover image of The King in Yellow
+featured-image: https://www.gutenberg.org/cache/epub/25973/pg25973.cover.medium.jpg
+featured-image-credit: 'This is a cover of the Birds of the Rockies by Keyser, Leander
+  S. (Leander Sylvester), 1856-1937 as extracted from Project Gutenberg; it can be
+  found here: https://www.gutenberg.org/ebooks/25973'
+featured-image-alt-text: Cover image of Birds of the Rockies
 home-title-y-padding: 10em
 home-banner-image-position: center
 advanced-search: true
